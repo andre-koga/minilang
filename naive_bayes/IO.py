@@ -6,12 +6,13 @@ import dill as pickle
 
 # -----------------------------------------------------------------
 
-DIRECTORY = 'word_lists'
+WORDS_DIRECTORY = 'word_lists'
+MODEL_DIRECTORY = 'models'
 MODEL_PATH = 'naive_bayes_model.pkl'
 
 # -----------------------------------------------------------------
 
-def save_word_list(lang, words, dir = DIRECTORY):
+def save_word_list(lang, words, dir = WORDS_DIRECTORY):
     """
     Save the word list to a local file.
     
@@ -28,7 +29,7 @@ def save_word_list(lang, words, dir = DIRECTORY):
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(words, f)
 
-def load_word_list(lang, dir = DIRECTORY):
+def load_word_list(lang, dir = WORDS_DIRECTORY):
     """
     Load the word list from a local file, if it exists.
     
@@ -46,7 +47,7 @@ def load_word_list(lang, dir = DIRECTORY):
         
     return None
 
-def load_training_data():
+def load_training_data(size = 100000, wordlist = 'best'):
     """
     Return the data for all available languages.
     
@@ -61,7 +62,7 @@ def load_training_data():
         
         if words is None:
             # If not available locally, download and save
-            words = top_n_list(lang, 100000, wordlist='best')
+            words = top_n_list(lang, size, wordlist=wordlist)
             save_word_list(lang, words)
             
         data[lang] = words
@@ -70,7 +71,7 @@ def load_training_data():
 
 # -----------------------------------------------------------------
 
-def load_model(file_name = MODEL_PATH, dir = DIRECTORY):
+def load_model(file_name = MODEL_PATH, dir = MODEL_DIRECTORY):
     full_path = os.path.join(dir, file_name)
     
     if not os.path.exists(full_path) or os.path.getsize(full_path) == 0:
@@ -83,3 +84,9 @@ def load_model(file_name = MODEL_PATH, dir = DIRECTORY):
     except (EOFError, FileNotFoundError) as e:
         print(f"Error loading model: {e}")
         return None
+    
+def store_model(model, file_name = MODEL_PATH, dir = MODEL_DIRECTORY):
+    full_path = os.path.join(dir, file_name)
+    
+    with open(full_path, 'wb') as file:
+        pickle.dump(model, file)

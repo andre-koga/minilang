@@ -1,17 +1,15 @@
 # used for checking the performance of the model on the test data
 # and storing the results in a file.
 
-from IO import load_training_data, load_model, MODEL_PATH
+from IO import load_training_data, load_model, store_model, MODEL_PATH
 from language_code import get_language_name
 import dill as pickle
 from model_training import NaiveBayesClassifier
-
-if __name__ == '__main__':
-    main()
+import sys
     
-def PredictLanguage(word):
-    naive_bayes_model = load_model()
-    data = load_training_data()
+def PredictLanguage(word, words_size=100000, path = MODEL_PATH):
+    naive_bayes_model = load_model(file_name=path)
+    data = load_training_data(size=words_size)
 
     if naive_bayes_model is None:
         print("Model file is missing or empty. Training a new model.")
@@ -19,15 +17,29 @@ def PredictLanguage(word):
         naive_bayes_model = NaiveBayesClassifier()
         naive_bayes_model.train(data)
         
-        with open(MODEL_PATH, 'wb') as file:
-            pickle.dump(naive_bayes_model, file)
-
-        print(f"Model saved to {MODEL_PATH}")
+        store_model(naive_bayes_model, file_name=path)
 
     predicted_language = naive_bayes_model.predict(word)
 
     print(f'The predicted language for the word "{word}" is: {get_language_name(predicted_language)}')
     
+# currently only supports one argument
 def main():
-    word = input("Enter a word: ")
-    PredictLanguage(word)
+    if len(sys.argv) > 1:
+        word = sys.argv[1]
+        PredictLanguage(word)
+    # if len(sys.argv) > 2:
+    #     word = sys.argv[1]
+    #     size = sys.argv[2]
+    #     PredictLanguage(word, size)
+    # if len(sys.argv) > 3:
+    #     word = sys.argv[1]
+    #     size = int(sys.argv[2])
+    #     path = sys.argv[3]
+    #     PredictLanguage(word, size, path)
+    # else:
+    #     word = input("Enter a word: ")
+    #     PredictLanguage(word)
+    
+if __name__ == '__main__':
+    main()
