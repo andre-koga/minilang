@@ -3,7 +3,6 @@
 
 from IO import load_training_data, load_model, store_model, MODEL_PATH
 from language_code import get_language_name
-import dill as pickle
 from model_training import NaiveBayesClassifier
 import sys
     
@@ -22,7 +21,9 @@ def PredictLanguage(word, words_size=100000, path = MODEL_PATH):
     predicted_language = naive_bayes_model.predict(word)
 
     print(f'The predicted language for the word "{word}" is: {get_language_name(predicted_language)}')
-    
+
+# -----------------------------------------------------------------
+
 # currently only supports one argument
 def main():
     if len(sys.argv) > 1:
