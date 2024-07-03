@@ -1,10 +1,7 @@
 # used for training the bayes model.
 
-from IO import load_training_data, load_model, MODEL_PATH
-from language_code import get_language_name
 from collections import defaultdict
 import numpy as np
-import dill as pickle
 
 # -----------------------------------------------------------------
 
@@ -17,7 +14,7 @@ class NaiveBayesClassifier:
     def default_feature_probs():
         return defaultdict(float)
     
-    def extract_features(word):
+    def extract_features(self, word):
         features = defaultdict(int)
         # Count frequency of each letter
         for char in word:
