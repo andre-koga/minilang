@@ -4,6 +4,7 @@ import numpy as np
 from wordfreq import top_n_list, get_frequency_list, available_languages
 import os
 import json
+import dill as pickle
 
 
 # Directory to store word lists
@@ -60,8 +61,12 @@ def extract_features(word):
 # Train a Naive Bayes classifier
 class NaiveBayesClassifier:
     def __init__(self):
-        self.class_probs = defaultdict(float)
-        self.feature_probs = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+        self.class_probs = {}
+        self.feature_probs = defaultdict(lambda: defaultdict(self.default_feature_probs))
+    
+    @staticmethod
+    def default_feature_probs():
+        return defaultdict(float)
     
     # def train(self, data):
     #     total_words = sum(len(words) for words in data.values())
@@ -76,7 +81,7 @@ class NaiveBayesClassifier:
     #             total = sum(self.feature_probs[language][feature].values())
     #             for value in self.feature_probs[language][feature]:
     #                 self.feature_probs[language][feature][value] /= total
-    
+        
     def train(self, data):
         total_words = sum(len(words) for words in data.values())
         vocab_size = len(set(word for words in data.values() for word in words))  # Estimate of total vocabulary size
@@ -92,7 +97,7 @@ class NaiveBayesClassifier:
                 for value in self.feature_probs[language][feature]:
                     # Apply Laplace smoothing
                     self.feature_probs[language][feature][value] = (self.feature_probs[language][feature][value] + 1) / (total + vocab_size)
-    
+        
     def predict(self, word):
         features = extract_features(word)
         scores = {}
@@ -105,13 +110,34 @@ class NaiveBayesClassifier:
                     scores[language] += np.log(1e-6)  # Smoothing for unseen features
         return max(scores, key=scores.get)
 
+def load_model(file_name):
+    if not os.path.exists(file_name) or os.path.getsize(file_name) == 0:
+        # File does not exist or is empty
+        return None
+    try:
+        with open(file_name, 'rb') as file:
+            model = pickle.load(file)
+            return model
+    except (EOFError, FileNotFoundError) as e:
+        print(f"Error loading model: {e}")
+        return None
+
 # Create and train the classifier
-classifier = NaiveBayesClassifier()
-classifier.train(data)
+naive_bayes_model = load_model('naive_bayes_model.pkl')
+if naive_bayes_model is None:
+    print("Model file is missing or empty. Training a new model.")
+    naive_bayes_model = NaiveBayesClassifier()
+    naive_bayes_model.train(data)
+    model_file_path = 'naive_bayes_model.pkl'
+    with open(model_file_path, 'wb') as file:
+        pickle.dump(naive_bayes_model, file)
+
+    print(f"Model saved to {model_file_path}")
+
 
 # Predict the language of a word
 word = 'bonjour'
-predicted_language = classifier.predict(word)
+predicted_language = naive_bayes_model.predict(word)
 
 language_code = {
     'ar': 'Arabic',
