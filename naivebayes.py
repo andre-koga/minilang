@@ -2,13 +2,42 @@ import pandas as pd
 from collections import defaultdict
 import numpy as np
 from wordfreq import top_n_list, get_frequency_list, available_languages
+import os
+import json
 
-# Example data structure: a dictionary where keys are languages and values are lists of words.
-langs = available_languages(wordlist='best')
-# print(langs)
+
+# Directory to store word lists
+word_list_dir = 'word_lists'
+
+# Ensure the directory exists
+os.makedirs(word_list_dir, exist_ok=True)
+
+def save_word_list(lang, words):
+    """Save the word list to a local file."""
+    file_path = os.path.join(word_list_dir, f'{lang}.json')
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(words, f)
+
+def load_word_list(lang):
+    """Load the word list from a local file, if it exists."""
+    file_path = os.path.join(word_list_dir, f'{lang}.json')
+    if os.path.exists(file_path):
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return None
+
+
 data = {}
+langs = available_languages(wordlist='best')
 for lang in langs.keys():
-    data[lang] = top_n_list(lang, 100000, wordlist='best')
+    # Try to load from local file first
+    words = load_word_list(lang)
+    if words is None:
+        # If not available locally, download and save
+        words = top_n_list(lang, 100000, wordlist='best')
+        save_word_list(lang, words)
+    data[lang] = words
+
 
 # Feature extraction function
 def extract_features(word):
@@ -81,7 +110,7 @@ classifier = NaiveBayesClassifier()
 classifier.train(data)
 
 # Predict the language of a word
-word = ''
+word = 'bonjour'
 predicted_language = classifier.predict(word)
 
 language_code = {
