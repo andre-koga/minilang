@@ -3,13 +3,12 @@ from collections import defaultdict
 import numpy as np
 from wordfreq import top_n_list, get_frequency_list, available_languages
 
-# Example data structure: a dictionary where keys are languages and values are lists of words. all words are
-# in the latin alphabet, lowercase, and no accents or special characters.
+# Example data structure: a dictionary where keys are languages and values are lists of words.
 langs = available_languages(wordlist='best')
 # print(langs)
 data = {}
 for lang in langs.keys():
-    data[lang] = top_n_list(lang, 10000, wordlist='best')
+    data[lang] = top_n_list(lang, 100000, wordlist='best')
 
 # Feature extraction function
 def extract_features(word):
@@ -82,7 +81,7 @@ classifier = NaiveBayesClassifier()
 classifier.train(data)
 
 # Predict the language of a word
-word = 'the'
+word = ''
 predicted_language = classifier.predict(word)
 
 language_code = {
