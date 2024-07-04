@@ -10,7 +10,7 @@ def PredictLanguage(string, words_size=100000, ngrams=(1, 2, 3), path = MODEL_BA
     # set alter_base_path to False to use the base path as is.
     # the directory is hardcoded on the IO.py file.
     full_path = f'{words_size}_{ngrams}_{path}' if alter_base_path else path
-    naive_bayes_model = load_model(file_name=path)
+    naive_bayes_model = load_model(file_name=full_path)
 
     if naive_bayes_model is None:
         data = load_training_data(size=words_size)
@@ -36,6 +36,8 @@ def main():
 
         # an example of how to run the script:
         # python model_testing.py "this is a test string"
+        
+        # IMPORTANT! this by default uses the top 100000 words and n-grams (1, 2, 3)
         
         string = sys.argv[1]
         
