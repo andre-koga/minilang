@@ -1,6 +1,6 @@
 # used for loading and storing different models and different data sources.
 
-from wordfreq import top_n_list, available_languages, get_frequency_dict
+from wordfreq import get_frequency_list, available_languages, get_frequency_dict
 import os, json
 import dill as pickle
 
@@ -65,20 +65,26 @@ def load_training_data(size = 100000, weighted=False):
     
     for lang in langs.keys():
         # Try to load from local file first
-        words = load_word_list(lang, weighted=weighted)
+        allWords = load_word_list(lang, weighted=weighted)
         
-        if words is None:
+        if allWords is None:
             # If not available locally, download and save
             # TO DO: I think the weighted one could be improved. It is very slow.
             
             if weighted:
-                wordlist = get_frequency_dict(lang)
-                words = sorted(wordlist, key=wordlist.get, reverse=True)[:size]
+                allWords = get_frequency_dict(lang, WORD_LIST_TYPE)
             else:
-                words = top_n_list(lang, size, wordlist=wordlist)
-            save_word_list(lang, words, weighted=weighted)
+                allWords = get_frequency_list(lang, WORD_LIST_TYPE)
+                
+            save_word_list(lang, allWords, weighted=weighted)
+        
+        if weighted:
+            top_n_items = sorted(allWords.items(), key=lambda item: item[1], reverse=True)[:size]
+            selectedWords = dict(top_n_items)
+        else:
+            selectedWords = allWords[:size]
             
-        data[lang] = words
+        data[lang] = selectedWords
         
     return data
 
