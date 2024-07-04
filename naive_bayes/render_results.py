@@ -1,77 +1,62 @@
 import matplotlib.pyplot as plt
 import json
+import pandas as pd
 import os
 
-models = [
-    (10000, (1, 2, 3), False),
-    (10000, (1, 2), False),
-    (10000, (1), False),
-    (1000, (1, 2, 3), False),
-    (1000, (1, 2), False),
-    (1000, (1), False),
+def stats_to_df(stats, model):
+    df = pd.DataFrame(columns=["model", "language", "word_length", "accuracy"])
+    for language in stats:
+        for word_length in stats[language]:
+            df.loc[df.shape[0]] = [
+                model,
+                language,
+                int(word_length),
+                float(stats[language][word_length])
+            ]
+    return df
+
+
+paths = [
+    '10000_(1, 2, 3)_unweighted_nb',
+    '10000_(1, 2)_unweighted_nb',
+    '10000_(1,)_unweighted_nb',
+    '1000_(1, 2, 3)_unweighted_nb',
+    '1000_(1, 2)_unweighted_nb',
+    '1000_(1,)_unweighted_nb'
 ]
 
-paths = []
-names = []
-for model in models:
-    tuple_str = str(model[1]) if type(model[1]) == tuple else f"({model[1]},)"
-    paths.append(f"{model[0]}_{tuple_str}_{'weighted' if model[2] else 'unweighted'}_nb")
-    names.append(f"{model[0]} words, {tuple_str} ngrams")
+dfs = []
 
-stats = []
 for path in paths:
     with open(f"stats/{path}.pkl.json", 'r') as f:
-        stats.append(json.load(f))
+        data = json.load(f)
+        df = stats_to_df(data, path)
+        dfs.append(df)
 
-accuracy_by_num_words = {}
-for i, stat in enumerate(stats): # for each model
-    for lang in stat:            # for each language
-        for ngram in stat[lang]: # for each ngram
-            accuracy_by_num_words[ngram] = accuracy_by_num_words.get(ngram, {})
-            accuracy_by_num_words[ngram][names[i]] = accuracy_by_num_words[ngram].get(names[i], 0) \
-                                                    + (stat[lang][ngram])
+df = pd.concat(dfs)
 
-total = len(stats[0].keys())
-for num_words in accuracy_by_num_words:
-    for model in accuracy_by_num_words[num_words]:
-        accuracy_by_num_words[num_words][model] /= total
+df['word_count'] = df['model'].str.split("_").str[0]
+df['ngram_count'] = df['model'].str.count(' ') + 1 # bad but idk how else to do it
 
-for num_words in accuracy_by_num_words:
-    xs = names
-    ys = []
-    for model in accuracy_by_num_words[num_words]:
-        ys.append(accuracy_by_num_words[num_words][model])
+accuracy_by_word_length = df.groupby(["model", "word_length"])["accuracy"].mean().reset_index(name="accuracy")
 
-    plt.figure()
-    plt.bar(xs, ys)
-    plt.title(f"Accuracy by n-grams for {num_words} words")
-    plt.xlabel("Model")
-    plt.ylabel("Accuracy")
+# i'd rather not redo this work but i'm not sure how to do it better
+accuracy_by_word_length['word_count'] = accuracy_by_word_length['model'].str.split("_").str[0]
+accuracy_by_word_length['ngram_count'] = accuracy_by_word_length['model'].str.count(' ') + 1
+accuracy_by_word_length = accuracy_by_word_length.sort_values(by=['word_count', 'ngram_count', 'word_length'])
+
+for word_length in [1, 2, 5]:
+    accuracy_by_word_length[accuracy_by_word_length['word_length'] == word_length]\
+            .plot(x = "model", y = "accuracy", kind = "bar", title = f"Accuracy by model for word length {word_length}")
+    plt.xticks(rotation=15)
     plt.ylim(0, 1)
 
-    # 45 degree labels
-    plt.xticks(rotation=15)
+model_size = {
+    p : os.path.getsize(f"models/{p}.pkl") for p in paths
+}
 
-file_sizes = [os.path.getsize(f"models/{path}.pkl") for path in paths]
-plt.figure()
-plt.bar(paths, file_sizes)
-plt.title(f"Storage Size")
-plt.xlabel("Model")
-plt.ylabel("MB")
-plt.xticks(rotation=15)
-
-overall_accuracy = {}
-for num_words in accuracy_by_num_words:
-    for model in accuracy_by_num_words[num_words]:
-        overall_accuracy[model] = overall_accuracy.get(model, 0) + accuracy_by_num_words[num_words][model]
-
-accuracies = [overall_accuracy[model] / 3 for model in names]
-plt.figure()
-plt.scatter(file_sizes, accuracies)
-plt.title(f"Storage Size")
-plt.xlabel("File Size")
-plt.ylabel("Accuracy")
-for i, txt in enumerate(names):
-    plt.annotate(txt, (file_sizes[i], accuracies[i]))
+accuracy_overall = df.groupby(["model"])["accuracy"].mean().reset_index(name="accuracy")
+accuracy_overall['model_size'] = accuracy_overall['model'].map(model_size)
+accuracy_overall.plot(x = "model_size", y = "accuracy", kind = "scatter", title = "Accuracy by model size")
 
 plt.show()
