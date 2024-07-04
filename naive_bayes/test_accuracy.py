@@ -2,79 +2,81 @@ import os
 import json
 import random
 import sys
+import numpy as np
 from IO import *
 import subprocess
 
 #-------------------------------------------------------------
 
-def test_accuracy(n_times):
-    """
-    Tests the accuracy of the model on the given test data.
+STAT_DIR = 'stats'
 
-    Parameters:
-    - test_data (dict): A dictionary where keys are language labels and values are lists of strings in that language.
-    - model (NaiveBayesClassifier): The trained NaiveBayesClassifier model.
+#-------------------------------------------------------------
 
-    Returns:
-    - dict: number of words and their accuracy when tested
-    """
-    total_count = 0
-    correct_count = 0
+def test_accuracy(n_times, word_lengths, model_path):
     accuracy = {}
 
-    for number in range(1, 11): #test for 1 to 10 words
-        for _ in range(n_times): #test n times for each word
-            random_sentence_and_language = extract_random_word_and_language(number) # get (randomsentence, the actual language)
-            if number < 1:
-                random_sentence = [[' '.join(i)] for i in random_sentence_and_language[0]]
-            elif number == 1:
-                random_sentence = random_sentence_and_language[0]
+    # just get end of path
+    just_model_path = os.path.basename(model_path)
+    model = load_model(file_name=just_model_path)
 
-            predicted_language = execute_python_file("model_testing.py", random_sentence) # use model to predict sentence and guess the language
-            if predicted_language == random_sentence_and_language[1]: #compare them
-                correct_count += 1
+    for number in word_lengths: # how long should the sentence be
+        training_data = extract_random_word_and_language(number, n_times)
+
+        for language in training_data:
+            total_count = 0
+            correct_count = 0
+
+            for sentence in training_data[language]:
                 total_count += 1
-        acc_stats = correct_count / total_count if total_count > 0 else 0
-        accuracy[number] = acc_stats #compute accuracy
+                if model.predict(" ".join(sentence)) == language:
+                    correct_count += 1
+
+            accuracy[language] = accuracy.get(language, {})
+            accuracy[language][number] = correct_count / total_count
+        
+        print("Finished testing for word length: ", number)
 
     print(accuracy) #print and return the accuracy
+
+    if not os.path.exists(STAT_DIR):
+        os.makedirs(STAT_DIR)
+
+    with open(os.path.join(STAT_DIR, just_model_path + '.json'), 'w') as f:
+        json.dump(accuracy, f, indent=4)
+
     return accuracy
 #-------------------------------------------------------------
 
-def extract_random_word_and_language(number):
+def extract_random_word_and_language(words_per_language, number_of_words):
     languages_dict = load_training_data(size = MAX_WORD_LIST_SIZE, weighted=False)
-    extract_language = random.choice(list(languages_dict.keys()))
-    extract_words = []
-    for _ in range(number):
-        extract_words.append(random.choice(languages_dict[extract_language]))
-
-    return (extract_words,extract_language) # store randomword and actual language to return
-
-#-------------------------------------------------------------
-def execute_python_file(file_path, random_sentence):
-    try:
-        # Construct the com
-        # mand to execute the script
-        command = 'python' + file_path + str(random_sentence)
-        
-        # Execute the command and capture the result
-        result = subprocess.run(command, capture_output=True, text=True, check=True)
-        return result
     
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing script '{file_path}': {e}")
-        return None
+    out = {}
+    for language in languages_dict:
+        out[language] = [random.choices(languages_dict[language], k=words_per_language)
+                            for _ in range(number_of_words)]
+
+    return out
 
 #-------------------------------------------------------------
 def main():
-    if len(sys.argv) != 2:
-        print("please input correct number of arguments")
-        sys.exit()
+    import argparse
 
-    n_times = int(sys.argv[1]) #put in arguments for sys.args how many times to run,
-    test_accuracy(n_times)
-    print("hello")
+    # example usage: python ./test_accuracy.py MODEL_NAME -n 50 -w 1 2 5
 
+    parser = argparse.ArgumentParser(description='Test the accuracy of the model')
+    parser.add_argument("model_path", type=str, help='Path to the model file')
+    parser.add_argument('-n', "--num_tests", type=int, help='Number of words per language for testing (default 50)', required=False, default=50)
+    parser.add_argument('-w', "--word_lengths", type=str, help='Word lengths to test the model on (default = (1, 2,5))', required=False, default=["1", "2", "5"], nargs='+')
+
+    args = parser.parse_args()
+
+    n_times = int(args.num_tests)
+    word_lengths = [int(i.replace('(', '').replace(')', '').replace(',', '')) for i in args.word_lengths]
+    model_path = args.model_path
+
+    assert min(word_lengths) > 0, "Word length must be greater than 0"
+
+    test_accuracy(n_times, word_lengths, model_path)
 
 if __name__ == '__main__':
     main()

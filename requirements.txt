@@ -1,0 +1,4 @@
+wordfreq
+dill
+matplotlib
+numpy

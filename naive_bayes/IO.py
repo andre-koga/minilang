@@ -89,8 +89,8 @@ def load_training_data(size = MAX_WORD_LIST_SIZE, weighted=False):
 
 # -----------------------------------------------------------------
 
-def load_model(file_name = MODEL_BASE_PATH):
-    full_path = os.path.join(MODEL_DIRECTORY, file_name)
+def load_model(file_name = MODEL_BASE_PATH, is_full_path = False):
+    full_path = os.path.join(MODEL_DIRECTORY, file_name) if not is_full_path else file_name
     
     if not os.path.exists(full_path) or os.path.getsize(full_path) == 0:
         # File does not exist or is empty
