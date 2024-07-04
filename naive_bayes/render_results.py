@@ -1,3 +1,5 @@
+# Renders the results of the naive bayes models.
+
 import matplotlib.pyplot as plt
 import json
 import pandas as pd
