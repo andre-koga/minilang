@@ -107,5 +107,8 @@ def load_model(file_name = MODEL_BASE_PATH):
 def store_model(model, file_base_name = MODEL_BASE_PATH):
     full_path = os.path.join(MODEL_DIRECTORY, file_base_name)
     
+    # Create the directory if it does not exist
+    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+    
     with open(full_path, 'wb') as file:
         pickle.dump(model, file)
