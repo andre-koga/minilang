@@ -2,7 +2,8 @@ import os
 import json
 import random
 
-def test_accuracy(test_data, model):
+
+def test_accuracy(test_data, model, accuracy):
     """
     Tests the accuracy of the model on the given test data.
 
@@ -11,20 +12,25 @@ def test_accuracy(test_data, model):
     - model (NaiveBayesClassifier): The trained NaiveBayesClassifier model.
 
     Returns:
-    - float: The accuracy of the model on the test data.
+    - dict: number of words and their accuracy when tested
     """
     total_count = 0
     correct_count = 0
-    test_number = sys.argv[1]
-    for _ in range(test_number):
-        test_data = extract_random_word_and_language()
-        predicted_language = model.predict(string)
-        if predicted_language == test_data:
-            correct_count += 1
-            total_count += 1
+    n_times = int(sys.argv[1]) #put in arguments for sys.args how many times to run,
+    accuracy = {}
 
-    accuracy = correct_count / total_count if total_count > 0 else 0
-    print(f"Accuracy: {accuracy:.4f}")
+    for number in range(10): #test for 1 to 10 words
+        for _ in range(n_times): #test n times for each word
+            random_sentence_and_language = extract_random_word_and_language(number) # get (randomsentence, the actual language)
+            random_sentence = [[' '.join(i)] for i in random_sentence_and_language[0]]
+            predicted_language = model.predict(random_sentence) # use model to predict sentence and guess the language
+            if predicted_language == random_sentence_and_language[1]: #compare them
+                correct_count += 1
+                total_count += 1
+        acc_stats = correct_count / total_count if total_count > 0 else 0
+        accuracy[number] = acc_stats #compute accuracy
+
+    print(accuracy) #print and return the accuracy
     return accuracy
 
 
@@ -32,18 +38,8 @@ def test_accuracy(test_data, model):
 WORD_LIST_DIRECTORY = 'word_list'
 
 def extract_random_word_and_language():
-    """
-    Extract a random word and its corresponding language from JSON files in a directory.
 
-    Returns:
-    - tuple: A tuple containing the randomly selected word and its language code.
-    """
+    (sentence, actual_language) = ([],"") # store randomword and actual language to return
+    for _ in range(number_of_words):
     # List all JSON files in the directory
-
-# Example usage
-if __name__ == "__main__":
-    word, language = extract_random_word_and_language()
-    if word and language:
-        print(f"Randomly selected word: '{word}' from language: '{language}'")
-    else:
-        print("Failed to extract a random word and its language.")
+    return (sentence, actual_language)
