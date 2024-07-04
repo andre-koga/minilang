@@ -1,4 +1,4 @@
 wordfreq
 dill
 matplotlib
-numpy
+pandas
