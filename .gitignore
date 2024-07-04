@@ -1,0 +1,5 @@
+# ignore __pycache__ directory
+__pycache__/
+
+# ignore word_dicts directory
+word_dicts/
