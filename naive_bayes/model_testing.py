@@ -6,7 +6,7 @@ from language_code import get_language_name
 from model_training import NaiveBayesClassifier
 import sys
     
-def PredictLanguage(word, words_size=100000, path = MODEL_PATH):
+def PredictLanguage(string, words_size=100000, path = MODEL_PATH):
     naive_bayes_model = load_model(file_name=path)
     data = load_training_data(size=words_size)
 
@@ -18,16 +18,16 @@ def PredictLanguage(word, words_size=100000, path = MODEL_PATH):
         
         store_model(naive_bayes_model, file_name=path)
 
-    predicted_language = naive_bayes_model.predict(word)
+    predicted_language = naive_bayes_model.predict(string)
 
-    print(f'The predicted language for the word "{word}" is: {get_language_name(predicted_language)}')
+    print(f'The predicted language for the string {string} is: {get_language_name(predicted_language)}')
 
 # -----------------------------------------------------------------
 
 # currently only supports one argument
 def main():
     if len(sys.argv) > 1:
-        word = sys.argv[1]
+        word = sys.argv[1:]
         PredictLanguage(word)
     # if len(sys.argv) > 2:
     #     word = sys.argv[1]

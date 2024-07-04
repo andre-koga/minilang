@@ -15,21 +15,19 @@ class NaiveBayesClassifier:
     def default_feature_probs():
         return defaultdict(float)
     
-    def extract_features(self, word):
+    def extract_features(self, string, ngrams=(1, 2, 3)):
         features = defaultdict(int)
         # Count frequency of each letter
-        for char in word:
-            features[f'char_{char}'] += 1
-        # Count frequency of each pair of neighboring letters (bigrams)
-        for i in range(len(word) - 1):
-            bigram = word[i:i+2]
-            features[f'bigram_{bigram}'] += 1
-        # Count frequency of each triplet of neighboring letters (trigrams)
-        for i in range(len(word) - 2):
-            trigram = word[i:i+3]
-            features[f'trigram_{trigram}'] += 1
+        for word in string:
+            for char in word:
+                features[f'char_{char}'] += 1
+            # Count the frequency of the chosen n-grams
+            for n in ngrams:
+                for i in range(len(word) - n + 1):
+                    ngram = string[i:i+n]
+                    features[f'ngram_{ngram}'] += 1
         # Add length of the word as a feature
-        features['length'] = len(word)
+            features['length'] += len(word)
         return features
         
     def train(self, data):
@@ -48,8 +46,8 @@ class NaiveBayesClassifier:
                     # Apply Laplace smoothing
                     self.feature_probs[language][feature][value] = (self.feature_probs[language][feature][value] + 1) / (total + vocab_size)
         
-    def predict(self, word):
-        features = self.extract_features(word)
+    def predict(self, string):
+        features = self.extract_features(string)
         scores = {}
         for language in self.class_probs:
             scores[language] = np.log(self.class_probs[language])
