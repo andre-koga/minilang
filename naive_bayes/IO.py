@@ -1,35 +1,40 @@
 # used for loading and storing different models and different data sources.
 
-from wordfreq import top_n_list, available_languages
+from wordfreq import top_n_list, available_languages, get_frequency_dict
 import os, json
 import dill as pickle
 
 # -----------------------------------------------------------------
 
+# DO NOT CHANGE!
+WORD_LIST_TYPE = 'best'
+
 WORDS_DIRECTORY = 'word_lists'
+WEIGHTED_DIRECTORY = 'weighted_word_lists'
 MODEL_DIRECTORY = 'models'
 MODEL_BASE_PATH = 'nb.pkl' # nb stands for Naive Bayes
 
 # -----------------------------------------------------------------
 
-def save_word_list(lang, words, dir = WORDS_DIRECTORY):
+def save_word_list(lang, words, weighted=False):
     """
     Save the word list to a local file.
     
     Parameters:
     - lang: the language code
     - words: the list of words
-    - dir: the directory to save the file in
     
     Returns: None
     """
+    dir = WEIGHTED_DIRECTORY if weighted else WORDS_DIRECTORY
+    
     os.makedirs(dir, exist_ok=True)
-    file_path = os.path.join(dir, f'{lang}.json')
+    file_path = os.path.join(dir, f'{lang}_{weighted}.json')
     
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(words, f)
 
-def load_word_list(lang, dir = WORDS_DIRECTORY):
+def load_word_list(lang, weighted=False):
     """
     Load the word list from a local file, if it exists.
     
@@ -39,7 +44,9 @@ def load_word_list(lang, dir = WORDS_DIRECTORY):
     
     Returns: the list of words, or None if the file does not exist
     """
-    file_path = os.path.join(dir, f'{lang}.json'
+    dir = WEIGHTED_DIRECTORY if weighted else WORDS_DIRECTORY
+    
+    file_path = os.path.join(dir, f'{lang}_{weighted}.json'
                              )
     if os.path.exists(file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -47,23 +54,29 @@ def load_word_list(lang, dir = WORDS_DIRECTORY):
         
     return None
 
-def load_training_data(size = 100000, wordlist = 'best'):
+def load_training_data(size = 100000, weighted=False):
     """
     Return the data for all available languages.
     
     Returns: a dictionary of language codes to lists of words
     """
     data = {}
-    langs = available_languages(wordlist='best')
+    langs = available_languages(WORD_LIST_TYPE)
     
     for lang in langs.keys():
         # Try to load from local file first
-        words = load_word_list(lang)
+        words = load_word_list(lang, weighted=weighted)
         
         if words is None:
             # If not available locally, download and save
-            words = top_n_list(lang, size, wordlist=wordlist)
-            save_word_list(lang, words)
+            # TO DO: I think the weighted one could be improved. It is very slow.
+            
+            if weighted:
+                wordlist = get_frequency_dict(lang)
+                words = sorted(wordlist, key=wordlist.get, reverse=True)[:size]
+            else:
+                words = top_n_list(lang, size, wordlist=wordlist)
+            save_word_list(lang, words, weighted=weighted)
             
         data[lang] = words
         
