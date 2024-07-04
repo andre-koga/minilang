@@ -18,7 +18,8 @@ class NaiveBayesClassifier:
     def extract_features(self, string, ngrams=(1, 2, 3)):
         features = defaultdict(int)
         # Count frequency of each letter
-        for word in string:
+        words = string.split()
+        for word in words:
             for char in word:
                 features[f'char_{char}'] += 1
             # Count the frequency of the chosen n-grams

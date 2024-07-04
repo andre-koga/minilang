@@ -20,27 +20,19 @@ def PredictLanguage(string, words_size=100000, path = MODEL_PATH):
 
     predicted_language = naive_bayes_model.predict(string)
 
-    print(f'The predicted language for the string {string} is: {get_language_name(predicted_language)}')
+    print(f'The predicted language for the string "{string}" is: {get_language_name(predicted_language)}')
+    print(f'Bear in mind that lowercase and uppercase may affect the prediction.')
 
 # -----------------------------------------------------------------
 
-# currently only supports one argument
+# currently only supports a single argument, the string
 def main():
-    if len(sys.argv) > 1:
-        word = sys.argv[1:]
-        PredictLanguage(word)
-    # if len(sys.argv) > 2:
-    #     word = sys.argv[1]
-    #     size = sys.argv[2]
-    #     PredictLanguage(word, size)
-    # if len(sys.argv) > 3:
-    #     word = sys.argv[1]
-    #     size = int(sys.argv[2])
-    #     path = sys.argv[3]
-    #     PredictLanguage(word, size, path)
-    # else:
-    #     word = input("Enter a word: ")
-    #     PredictLanguage(word)
+    if len(sys.argv) == 2:
+        string = sys.argv[1]
+        PredictLanguage(string)
+    else:
+        print("Please provide a single argument, the string to predict the language of.")
+        sys.exit(1)
     
 if __name__ == '__main__':
     main()
