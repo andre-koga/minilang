@@ -31,13 +31,13 @@ class NaiveBayesClassifier:
             features['length'] += len(word)
         return features
         
-    def train(self, data):
+    def train(self, data, ngrams=(1, 2, 3)):
         total_words = sum(len(words) for words in data.values())
         vocab_size = len(set(word for words in data.values() for word in words))  # Estimate of total vocabulary size
         for language, words in data.items():
             self.class_probs[language] = len(words) / total_words
             for word in words:
-                features = self.extract_features(word)
+                features = self.extract_features(word, ngrams=ngrams)
                 for feature, value in features.items():
                     self.feature_probs[language][feature][value] += 1
         for language in self.feature_probs:

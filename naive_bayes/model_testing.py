@@ -1,20 +1,22 @@
 # used for checking the performance of the model on the test data
 # and storing the results in a file.
 
-from IO import load_training_data, load_model, store_model, MODEL_PATH
+from IO import load_training_data, load_model, store_model, MODEL_BASE_PATH
 from language_code import get_language_name
 from model_training import NaiveBayesClassifier
 import sys
     
-def PredictLanguage(string, words_size=100000, path = MODEL_PATH):
+def PredictLanguage(string, words_size=100000, ngrams=(1, 2, 3), path = MODEL_BASE_PATH):
     naive_bayes_model = load_model(file_name=path)
-    data = load_training_data(size=words_size)
 
     if naive_bayes_model is None:
-        print("Model file is missing or empty. Training a new model.")
+        data = load_training_data(size=words_size)
+        
+        print(f'Model file is missing or empty. Training a new model using the top
+              {words_size} words per language.')
         
         naive_bayes_model = NaiveBayesClassifier()
-        naive_bayes_model.train(data)
+        naive_bayes_model.train(data, ngrams=ngrams)
         
         store_model(naive_bayes_model, file_name=path)
 

@@ -8,7 +8,7 @@ import dill as pickle
 
 WORDS_DIRECTORY = 'word_lists'
 MODEL_DIRECTORY = 'models'
-MODEL_PATH = 'naive_bayes_model.pkl'
+MODEL_BASE_PATH = 'nb.pkl' # nb stands for Naive Bayes
 
 # -----------------------------------------------------------------
 
@@ -71,7 +71,7 @@ def load_training_data(size = 100000, wordlist = 'best'):
 
 # -----------------------------------------------------------------
 
-def load_model(file_name = MODEL_PATH, dir = MODEL_DIRECTORY):
+def load_model(file_name = MODEL_BASE_PATH, dir = MODEL_DIRECTORY):
     full_path = os.path.join(dir, file_name)
     
     if not os.path.exists(full_path) or os.path.getsize(full_path) == 0:
@@ -85,7 +85,7 @@ def load_model(file_name = MODEL_PATH, dir = MODEL_DIRECTORY):
         print(f"Error loading model: {e}")
         return None
     
-def store_model(model, file_name = MODEL_PATH, dir = MODEL_DIRECTORY):
+def store_model(model, file_name = MODEL_BASE_PATH, dir = MODEL_DIRECTORY):
     full_path = os.path.join(dir, file_name)
     
     with open(full_path, 'wb') as file:
