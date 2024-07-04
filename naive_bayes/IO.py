@@ -85,8 +85,8 @@ def load_model(file_name = MODEL_BASE_PATH, dir = MODEL_DIRECTORY):
         print(f"Error loading model: {e}")
         return None
     
-def store_model(model, file_name = MODEL_BASE_PATH, dir = MODEL_DIRECTORY):
-    full_path = os.path.join(dir, file_name)
+def store_model(model, file_base_name = MODEL_BASE_PATH, dir = MODEL_DIRECTORY):
+    full_path = os.path.join(dir, file_base_name)
     
     with open(full_path, 'wb') as file:
         pickle.dump(model, file)
