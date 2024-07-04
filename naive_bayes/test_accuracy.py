@@ -1,4 +1,4 @@
-
+# Tests the accuracy of the model on a given dataset.
 
 import os
 import json
