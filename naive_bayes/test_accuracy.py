@@ -11,7 +11,18 @@ STAT_DIR = 'stats'
 
 #-------------------------------------------------------------
 
-def test_accuracy(n_times, word_lengths, model_path):
+def test_accuracy(n_times : int, word_lengths : list[str], model_path : str) -> dict:
+    """
+    Evaluate a given model on n_times number of words for each language, for sentences
+    of each length in word_lengths. Save the results to a file in the stats directory.
+
+    Parameters:
+    - n_times: number of words per language to test
+    - word_lengths: list of word lengths to test
+    - model_path: path to the model file
+
+    Returns: dictionary of the form {language: {word_length: accuracy, ...}, ...}
+    """
     accuracy = {}
 
     # just get end of path
@@ -19,7 +30,7 @@ def test_accuracy(n_times, word_lengths, model_path):
     model = load_model(file_name=just_model_path)
 
     for number in word_lengths: # how long should the sentence be
-        training_data = extract_random_word_and_language(number, n_times)
+        training_data = generate_test_dataset(number, n_times)
 
         for language in training_data:
             total_count = 0
@@ -46,7 +57,17 @@ def test_accuracy(n_times, word_lengths, model_path):
     return accuracy
 #-------------------------------------------------------------
 
-def extract_random_word_and_language(words_per_language, number_of_words):
+def generate_test_dataset(words_per_language, number_of_words):
+    """
+    Creates a dataset of random words for each language for model testing.
+
+    Parameters:
+    - words_per_language: number of words per language
+    - number_of_words: number of languages to test
+
+    Returns: dictionary of the form {language: [[word1, word2, ...], ...], ...}.
+    Note that there will be words_per_language * number_of_words * number_of_languages (~40) words in total.
+    """
     languages_dict = load_training_data(size = MAX_WORD_LIST_SIZE, weighted=False)
     
     out = {}
