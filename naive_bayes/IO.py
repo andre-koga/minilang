@@ -85,7 +85,6 @@ def load_training_data(size = MAX_WORD_LIST_SIZE, weighted=False):
         
         chosen_words = dict(chosen_words) if weighted else [item[0] for item in chosen_words]    
         data[lang] = chosen_words
-        
     return data
 
 # -----------------------------------------------------------------

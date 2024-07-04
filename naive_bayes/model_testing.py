@@ -27,6 +27,7 @@ def PredictLanguage(string, words_size=MAX_WORD_LIST_SIZE, ngrams=(1, 2, 3), wei
 
     print(f'The predicted language for the string "{string}" is: {get_language_name(predicted_language)}')
     print(f'Bear in mind that lowercase and uppercase may affect the prediction.')
+    return predicted_language
 
 # -----------------------------------------------------------------
 
