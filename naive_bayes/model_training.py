@@ -31,7 +31,10 @@ class NaiveBayesClassifier:
             features['length'] += len(word)
         return features
         
-    def train(self, data, ngrams=(1, 2, 3)):
+    def train(self, data, ngrams=(1, 2, 3), weighted=False):
+        if weighted:
+            self.train_weighted(data, ngrams)
+            return
         total_words = sum(len(words) for words in data.values())
         vocab_size = len(set(word for words in data.values() for word in words))  # Estimate of total vocabulary size
         for language, words in data.items():
@@ -46,7 +49,25 @@ class NaiveBayesClassifier:
                 for value in self.feature_probs[language][feature]:
                     # Apply Laplace smoothing
                     self.feature_probs[language][feature][value] = (self.feature_probs[language][feature][value] + 1) / (total + vocab_size)
-        
+    
+    def train_weighted(self, data, ngrams=(1, 2, 3)):
+        total_words = sum(freq for words_freq in data.values() for freq in words_freq.values())
+        # total_words = sum(len(words) * freq for words, freq in data.values())
+        vocab_size = len(set(word for words in data.keys() for word in words))  # Estimate of total vocabulary size
+        for language, words_freq in data.items():
+            self.class_probs[language] = sum(freq for freq in words_freq.values()) / total_words
+            for word, freq in words_freq.items():
+                features = self.extract_features(word, ngrams=ngrams)
+                for feature, value in features.items():
+                    # Multiply the feature count by the word frequency
+                    self.feature_probs[language][feature][value] += value * freq
+        for language in self.feature_probs:
+            for feature in self.feature_probs[language]:
+                total = sum(self.feature_probs[language][feature].values())
+                for value in self.feature_probs[language][feature]:
+                    # Apply Laplace smoothing
+                    self.feature_probs[language][feature][value] = (self.feature_probs[language][feature][value] + 1) / (total + vocab_size)
+                
     def predict(self, string):
         features = self.extract_features(string)
         scores = {}
