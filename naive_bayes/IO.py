@@ -8,7 +8,7 @@ import dill as pickle
 
 # DO NOT CHANGE!
 WORD_LIST_TYPE = 'best'
-MAX_WORD_LIST_SIZE = 10000 # ten thousand
+MAX_WORD_LIST_SIZE = 20000 # twenty thousand
 WORDS_DIRECTORY = 'word_dicts'
 MODEL_DIRECTORY = 'models'
 MODEL_BASE_PATH = 'nb.pkl' # nb stands for Naive Bayes
@@ -66,29 +66,32 @@ def load_training_data(size = MAX_WORD_LIST_SIZE, weighted=False):
     
     for lang in langs.keys():
         # Try to load from local file first
-        all_words = load_word_dict(lang)
-        top_n_items = sorted(all_words.items(), key=lambda item: item[1], reverse=True)[:size]
+        chosen_words = load_word_dict(lang)
         
-        if all_words is None:
+        
+        if chosen_words is None:
             # If not available locally, download and save
             # TO DO: I think the weighted one could be improved. It is very slow.
+            print(f'Word list for {lang} not found locally. Downloading...')
 
-            all_words = get_frequency_dict(lang, WORD_LIST_TYPE)
+            chosen_words = get_frequency_dict(lang, WORD_LIST_TYPE)
             # limit allWords by the MAX_WORD_LIST_SIZE
-            words_to_save = dict(sorted(all_words.items(), key=lambda item: item[1], reverse=True)[:MAX_WORD_LIST_SIZE])
+            words_to_save = dict(sorted(chosen_words.items(), key=lambda item: item[1], reverse=True)[:MAX_WORD_LIST_SIZE])
             save_word_dict(lang, words_to_save)
 
-            top_n_items = sorted(words_to_save.items(), key=lambda item: item[1], reverse=True)[:size]
+            chosen_words = sorted(words_to_save.items(), key=lambda item: item[1], reverse=True)[:size]
+        else:
+            chosen_words = sorted(chosen_words.items(), key=lambda item: item[1], reverse=True)[:size]
         
-        selectedWords = dict(top_n_items) if weighted else [item[0] for item in top_n_items]    
-        data[lang] = selectedWords
+        chosen_words = dict(chosen_words) if weighted else [item[0] for item in chosen_words]    
+        data[lang] = chosen_words
         
     return data
 
 # -----------------------------------------------------------------
 
 def load_model(file_name = MODEL_BASE_PATH):
-    full_path = os.path.join(WORDS_DIRECTORY, file_name)
+    full_path = os.path.join(MODEL_DIRECTORY, file_name)
     
     if not os.path.exists(full_path) or os.path.getsize(full_path) == 0:
         # File does not exist or is empty

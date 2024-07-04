@@ -9,7 +9,7 @@ import sys
 def PredictLanguage(string, words_size=MAX_WORD_LIST_SIZE, ngrams=(1, 2, 3), weighted=False, path = MODEL_BASE_PATH, alter_base_path=True):
     # set alter_base_path to False to use the base path as is.
     # the directory is hardcoded on the IO.py file.
-    full_path = f'{words_size}_{ngrams}_{path}_{weighted}' if alter_base_path else path
+    full_path = f'{words_size}_{ngrams}_{weighted}_{path}' if alter_base_path else path
     naive_bayes_model = load_model(file_name=full_path)
 
     if naive_bayes_model is None:
@@ -56,7 +56,7 @@ def main():
         string = sys.argv[1]
         words_size = int(sys.argv[2])
         n_grams = tuple(map(int, sys.argv[3].split(',')))
-        weighted = bool(sys.argv[4])
+        weighted = False if sys.argv[4] == 'False' else True
         
         PredictLanguage(string, words_size, n_grams, weighted)
     elif len(sys.argv) == 7:
