@@ -25,7 +25,7 @@ class NaiveBayesClassifier:
             # Count the frequency of the chosen n-grams
             for n in ngrams:
                 for i in range(len(word) - n + 1):
-                    ngram = string[i:i+n]
+                    ngram = word[i:i+n]
                     features[f'ngram_{ngram}'] += 1
         # Add length of the word as a feature
             features['length'] += len(word)
