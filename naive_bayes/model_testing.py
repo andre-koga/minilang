@@ -9,13 +9,13 @@ import sys
 def PredictLanguage(string, words_size=MAX_WORD_LIST_SIZE, ngrams=(1, 2, 3), weighted=False, path = MODEL_BASE_PATH, alter_base_path=True):
     # set alter_base_path to False to use the base path as is.
     # the directory is hardcoded on the IO.py file.
-    full_path = f'{words_size}_{ngrams}_{weighted}_{path}' if alter_base_path else path
+    full_path = f'{words_size}_{ngrams}_{"weighted" if weighted else "unweighted"}_{path}' if alter_base_path else path
     naive_bayes_model = load_model(file_name=full_path)
 
     if naive_bayes_model is None:
         data = load_training_data(size=words_size, weighted=weighted)
         
-        print(f'Model file is missing or empty. Training a new model using the arguments: words_size={words_size}, ngrams={ngrams}, weighted={weighted}.')
+        print(f'\nModel file is missing or empty. Training a new model using the arguments: words_size={words_size}, ngrams={ngrams}, weighted={weighted}.')
         print(f'It will be stored at {full_path}.')
         
         naive_bayes_model = NaiveBayesClassifier()
@@ -25,7 +25,8 @@ def PredictLanguage(string, words_size=MAX_WORD_LIST_SIZE, ngrams=(1, 2, 3), wei
 
     predicted_language = naive_bayes_model.predict(string)
 
-    print(f'The predicted language for the string "{string}" is: {get_language_name(predicted_language)}')
+    
+    print(f'The predicted language for the string "{string}" is: {get_language_name(predicted_language)}\n')
     print(f'Bear in mind that lowercase and uppercase may affect the prediction.')
     return predicted_language
 

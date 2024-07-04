@@ -25,10 +25,9 @@ class NaiveBayesClassifier:
             # Count the frequency of the chosen n-grams
             for n in ngrams:
                 for i in range(len(word) - n + 1):
-                    ngram = string[i:i+n]
+                    ngram = word[i:i+n]
                     features[f'ngram_{ngram}'] += 1
-        # Add length of the word as a feature
-            features['length'] += len(word)
+                    
         return features
         
     def train(self, data, ngrams=(1, 2, 3), weighted=False):
@@ -51,16 +50,18 @@ class NaiveBayesClassifier:
                     self.feature_probs[language][feature][value] = (self.feature_probs[language][feature][value] + 1) / (total + vocab_size)
     
     def train_weighted(self, data, ngrams=(1, 2, 3)):
-        total_words = sum(freq for words_freq in data.values() for freq in words_freq.values())
-        # total_words = sum(len(words) * freq for words, freq in data.values())
+        total_weight = sum(freq for words_freq in data.values() for freq in words_freq.values())
         vocab_size = len(set(word for words in data.keys() for word in words))  # Estimate of total vocabulary size
-        for language, words_freq in data.items():
-            self.class_probs[language] = sum(freq for freq in words_freq.values()) / total_words
-            for word, freq in words_freq.items():
+        for language, words_freq_dict in data.items():
+            # Calculate the class probability
+            self.class_probs[language] = sum(freq for freq in words_freq_dict.values()) / total_weight
+            
+            for word, freq in words_freq_dict.items():
                 features = self.extract_features(word, ngrams=ngrams)
                 for feature, value in features.items():
                     # Multiply the feature count by the word frequency
                     self.feature_probs[language][feature][value] += value * freq
+                    
         for language in self.feature_probs:
             for feature in self.feature_probs[language]:
                 total = sum(self.feature_probs[language][feature].values())
