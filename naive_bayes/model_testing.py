@@ -30,7 +30,7 @@ def PredictLanguage(string, words_size=MAX_WORD_LIST_SIZE, ngrams=(1, 2, 3), wei
     print(f'Bear in mind that lowercase and uppercase may affect the prediction.')
     return predicted_language
 
-def PredictLanguageRaw(string, words_size=MAX_WORD_LIST_SIZE, ngrams=(1, 2, 3), weighted=False, path = MODEL_BASE_PATH, alter_base_path=True):
+def PredictLanguageRaw(string, words_size=MAX_WORD_LIST_SIZE, ngrams=(1, 2, 3), weighted=False, path="nb.pkl", alter_base_path=True):
     full_path = f'{words_size}_{ngrams}_{"weighted" if weighted else "unweighted"}_{path}' if alter_base_path else path
     naive_bayes_model = load_model(file_name=full_path)
 
