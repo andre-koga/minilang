@@ -2,3 +2,5 @@ wordfreq
 dill
 matplotlib
 pandas
+torch
+transformers
