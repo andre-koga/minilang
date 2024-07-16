@@ -1,12 +1,12 @@
 # used for checking the performance of the model on the test data
 # and storing the results in a file.
 
+import sys
 import torch
-from ..shared_scripts import IO, Lang
+from .. import IO, Lang
 from transformer.model_training import TransformerClassifier
 from transformers import BertTokenizer
 from prepare_dataset import prepare_dataset
-import sys
 
 def PredictLanguage(string, words_size=IO.MAX_WORD_LIST_SIZE, path='trans.pkl', alter_base_path=False):
     # set alter_base_path to False to use the base path as is.

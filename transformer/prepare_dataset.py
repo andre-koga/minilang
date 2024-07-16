@@ -2,7 +2,7 @@
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from ..shared_scripts import IO
+from .. import IO
 
 # -----------------------------------------------------------------
 
