@@ -10,11 +10,12 @@ import numpy as np
 import warnings
 
 class RandomForestLanguageClassifier:
-    def __init__(self, words_per_language = 1000, n_trees = 100, max_depth = 2, max_ngrams = 2):
+    def __init__(self, words_per_language = 1000, n_trees = 100, max_depth = 2, max_ngrams = 2, n_pca = -1):
         self.words_per_language = words_per_language
         self.n_trees = n_trees
         self.max_depth = max_depth
         self.max_ngrams = max_ngrams
+        self.n_pca = n_pca
 
     def train(self):
         """
@@ -22,7 +23,7 @@ class RandomForestLanguageClassifier:
 
         returns: None
         """
-        data = load_training_data(self.words_per_language)
+        data = load_training_data(self.words_per_language, only_non_logographic=True)
         print("Words loaded...")
 
         tuples = [(word, lang) for lang in data for word in data[lang]]
@@ -38,8 +39,10 @@ class RandomForestLanguageClassifier:
 
         with warnings.catch_warnings():
             warnings.simplefilter(action='ignore', category=FutureWarning)
-            self.pca = PCA(n_components=100)
-            X = self.pca.fit_transform(X)
+            if self.n_pca != -1:
+                self.pca = PCA(n_components=self.n_pca)
+                X = self.pca.fit_transform(X)
+
             print("Dimensionality reduced...")
 
             self.clf = RandomForestClassifier(verbose=2, n_estimators=self.n_trees,
@@ -95,10 +98,13 @@ class RandomForestLanguageClassifier:
         
         with warnings.catch_warnings():
             warnings.simplefilter(action='ignore', category=FutureWarning)
-            merged = self.pca.transform(merged)
+            if self.n_pca != -1:
+                merged = self.pca.transform(merged)
             preds = self.clf.predict_proba(merged)
         soft_prediction = np.sum(preds, axis = 0)
         soft_prediction /= np.sum(soft_prediction)
+
+        print(soft_prediction)
 
         hard_prediction = self.encoder.classes_[np.argmax(soft_prediction)]
         hard_prediction = LANGUAGE_CODE[hard_prediction]
@@ -106,7 +112,7 @@ class RandomForestLanguageClassifier:
         return hard_prediction, soft_prediction
 
 if __name__ == "__main__":
-    test = RandomForestLanguageClassifier(n_trees=100, max_depth=1)
+    test = RandomForestLanguageClassifier(n_trees=1000, max_depth=6, n_pca=250)
     test.train()
     while True:
         word = input("Enter a sentence or 'quit': ")

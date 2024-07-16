@@ -47,6 +47,10 @@ LANGUAGE_CODE = {
     'vi': 'Vietnamese'
 }
 
+non_logographic_langs = [
+    'ca', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fil', 'fr', 'hu', 'id', 'is', 'it', 'lt', 'lv', 'ms', 'nb', 'nl', 'pl', 'pt', 'ro', 'sh', 'sk', 'sl', 'sv', 'tr'
+]
+
 def get_language_name(code):
     """
     Get the name of the language corresponding to the given code.
