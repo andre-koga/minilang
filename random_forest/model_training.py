@@ -3,6 +3,7 @@ from Lang import LANGUAGE_CODE
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
+from sklearn.decomposition import PCA
 
 import pandas as pd
 import numpy as np
@@ -32,10 +33,15 @@ class RandomForestLanguageClassifier:
         y = self.encoder.transform(df['Language'])
         X = self._generate_features(df['Word'])
         self.cols = X.columns
+
         print("Training data generated...")
 
         with warnings.catch_warnings():
             warnings.simplefilter(action='ignore', category=FutureWarning)
+            self.pca = PCA(n_components=100)
+            X = self.pca.fit_transform(X)
+            print("Dimensionality reduced...")
+
             self.clf = RandomForestClassifier(verbose=2, n_estimators=self.n_trees,
                 max_depth=self.max_depth, n_jobs=-1)
             self.clf.fit(X, y)
@@ -86,10 +92,10 @@ class RandomForestLanguageClassifier:
         X = pd.DataFrame(columns = self.cols)
 
         merged = X.merge(features, how='right')[self.cols].fillna(0)
-
         
         with warnings.catch_warnings():
             warnings.simplefilter(action='ignore', category=FutureWarning)
+            merged = self.pca.transform(merged)
             preds = self.clf.predict_proba(merged)
         soft_prediction = np.sum(preds, axis = 0)
         soft_prediction /= np.sum(soft_prediction)
@@ -100,7 +106,7 @@ class RandomForestLanguageClassifier:
         return hard_prediction, soft_prediction
 
 if __name__ == "__main__":
-    test = RandomForestLanguageClassifier(n_trees=25)
+    test = RandomForestLanguageClassifier(n_trees=100, max_depth=1)
     test.train()
     while True:
         word = input("Enter a sentence or 'quit': ")
