@@ -1,8 +1,8 @@
-# ignore __pycache__ directory inside of naive_bayes directory
+# ignore __pycache__ directory
 __pycache__/
 
 # ignore word_dicts directory
 word_dicts/
 
-# ignore models created inside of naive_bayes directory
-naive_bayes/models/
+# ignore models created
+models/

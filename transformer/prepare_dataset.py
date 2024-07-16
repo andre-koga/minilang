@@ -2,7 +2,7 @@
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
-
+from IO import load_training_data
 
 # Convert to a DataFrame
 df = pd.DataFrame([(word, lang) for lang, words in data.items() for word in words], columns=['word', 'language'])

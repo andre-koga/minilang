@@ -1,12 +1,12 @@
 # used for checking the performance of the model on the test data
 # and storing the results in a file.
 
-from IO import load_training_data, load_model, store_model, MODEL_BASE_PATH, MAX_WORD_LIST_SIZE
+from IO import load_training_data, load_model, store_model, MAX_WORD_LIST_SIZE
 from language_code import get_language_name
 from model_training import NaiveBayesClassifier
 import sys
     
-def PredictLanguage(string, words_size=MAX_WORD_LIST_SIZE, ngrams=(1, 2, 3), weighted=False, path = MODEL_BASE_PATH, alter_base_path=True):
+def PredictLanguage(string, words_size=MAX_WORD_LIST_SIZE, ngrams=(1, 2, 3), weighted=False, path = "nb.pkl", alter_base_path=True):
     # set alter_base_path to False to use the base path as is.
     # the directory is hardcoded on the IO.py file.
     full_path = f'{words_size}_{ngrams}_{"weighted" if weighted else "unweighted"}_{path}' if alter_base_path else path
