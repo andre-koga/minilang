@@ -1,4 +1,5 @@
 # used for loading and storing different models and different data sources.
+# it is used by all models.
 
 from wordfreq import available_languages, get_frequency_dict
 import os, json
@@ -11,7 +12,6 @@ WORD_LIST_TYPE = 'best'
 MAX_WORD_LIST_SIZE = 20000 # twenty thousand
 WORDS_DIRECTORY = 'word_dicts'
 MODEL_DIRECTORY = 'models'
-MODEL_BASE_PATH = 'nb.pkl' # nb stands for Naive Bayes
 
 # -----------------------------------------------------------------
 
@@ -89,7 +89,7 @@ def load_training_data(size = MAX_WORD_LIST_SIZE, weighted=False):
 
 # -----------------------------------------------------------------
 
-def load_model(file_name = MODEL_BASE_PATH, is_full_path = False):
+def load_model(file_name, is_full_path = False):
     full_path = os.path.join(MODEL_DIRECTORY, file_name) if not is_full_path else file_name
     
     if not os.path.exists(full_path) or os.path.getsize(full_path) == 0:
@@ -103,7 +103,7 @@ def load_model(file_name = MODEL_BASE_PATH, is_full_path = False):
         print(f"Error loading model: {e}")
         return None
     
-def store_model(model, file_base_name = MODEL_BASE_PATH):
+def store_model(model, file_base_name):
     full_path = os.path.join(MODEL_DIRECTORY, file_base_name)
     
     # Create the directory if it does not exist
