@@ -4,6 +4,7 @@
 from wordfreq import available_languages, get_frequency_dict
 import os, json
 import dill as pickle
+from Lang import non_logographic_langs
 
 # -----------------------------------------------------------------
 
@@ -47,7 +48,7 @@ def load_word_dict(lang):
         
     return None
 
-def load_training_data(size = MAX_WORD_LIST_SIZE, weighted=False):
+def load_training_data(size = MAX_WORD_LIST_SIZE, weighted=False, only_non_logographic=False):
     """
     Return the data for all available languages.
     
@@ -65,6 +66,9 @@ def load_training_data(size = MAX_WORD_LIST_SIZE, weighted=False):
     langs = available_languages(WORD_LIST_TYPE)
     
     for lang in langs.keys():
+        if only_non_logographic and lang not in non_logographic_langs:
+            continue
+
         # Try to load from local file first
         chosen_words = load_word_dict(lang)
         
