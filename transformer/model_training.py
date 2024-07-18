@@ -9,7 +9,7 @@ from WordDataset import WordDataset
 class TransformerClassifier:
     def __init__(self, label_mapping):
         # Load pre-trained tokenizer and model
-        model_name = 'google/bert_uncased_L-2_H-128_A-2'
+        model_name = 'google/bert_uncased_L-2_H-128_A-2' # i need to find a smaller bert model
         self.tokenizer = BertTokenizer.from_pretrained(model_name)
         self.model = BertForSequenceClassification.from_pretrained(model_name, num_labels=len(label_mapping))
 

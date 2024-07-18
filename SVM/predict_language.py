@@ -3,7 +3,7 @@ import sys
 import joblib
 from IO import load_model, load_training_data, MAX_WORD_LIST_SIZE, MODEL_DIRECTORY
 from sklearn.preprocessing import LabelEncoder
-import language_code
+import Lang
 
 class SVMLanguagePredictor:
     def __init__(self, model_file_name='svm_language_detector.pkl'):
@@ -49,7 +49,7 @@ def main():
     #test model by trying different sentences here 
     testing_sentence = 'आप के साथ क्या गलत हुआ है'
     predicted_lang = predictor.predict_language(testing_sentence)
-    print(f"The predicted language is: {language_code.get_language_name(predicted_lang)}")
+    print(f"The predicted language is: {Lang.get_language_name(predicted_lang)}")
 
 if __name__ == '__main__':
     main()

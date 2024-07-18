@@ -7,7 +7,6 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 import IO
-import language_code
 
 class SVMLanguageDetector:
     def __init__(self, model_file_name='svm_language_detector.pkl'):
@@ -77,3 +76,9 @@ class SVMLanguageDetector:
         pred = self.pipeline.predict([text])
         return self.label_encoder.inverse_transform(pred)[0]
 
+def main():
+    svm_language_detector = SVMLanguageDetector()
+    svm_language_detector.train()
+    
+if __name__ == '__main__':
+    main()
