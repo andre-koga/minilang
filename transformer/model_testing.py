@@ -3,9 +3,9 @@
 
 import sys
 import torch
-from .. import IO, Lang
-from transformer.model_training import TransformerClassifier
+import IO, Lang
 from transformers import BertTokenizer
+from model_training import TransformerClassifier
 from prepare_dataset import prepare_dataset
 
 def PredictLanguage(string, words_size=IO.MAX_WORD_LIST_SIZE, path='trans.pkl', alter_base_path=False):
@@ -53,3 +53,6 @@ def main():
         
     print(f'The predicted language for the string "{string}" is: {Lang.get_language_name(lang)}\n')
     print(f'Bear in mind that lowercase and uppercase may affect the prediction.')
+    
+if __name__ == '__main__':
+    main()

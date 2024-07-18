@@ -4,3 +4,4 @@ matplotlib
 pandas
 torch
 transformers
+transformers[torch]

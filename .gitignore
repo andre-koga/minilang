@@ -6,3 +6,6 @@ word_dicts/
 
 # ignore models created
 models/
+
+# a lotta model checkpoints for transformers
+transformer/results/

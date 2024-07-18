@@ -2,7 +2,7 @@
 # and storing the results in a file.
 
 import sys
-from .. import IO, Lang
+import IO, Lang
 from model_training import NaiveBayesClassifier
     
 def PredictLanguage(string, words_size=IO.MAX_WORD_LIST_SIZE, ngrams=(1, 2, 3), weighted=False, path = "nb.pkl", alter_base_path=True):
