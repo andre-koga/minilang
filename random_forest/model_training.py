@@ -23,16 +23,17 @@ class RandomForestLanguageClassifier:
 
         returns: None
         """
-        data = load_training_data(self.words_per_language, only_non_logographic=True)
+        data = load_training_data(self.words_per_language, only_non_logographic=True, weighted=True)
         print("Words loaded...")
 
-        tuples = [(word, lang) for lang in data for word in data[lang]]
-        df = pd.DataFrame(columns = ['Word', 'Language'], data = tuples)
+        tuples = [(word, lang, freq) for lang in data for word, freq in data[lang].items()]
+        df = pd.DataFrame(columns = ['Word', 'Language', 'Frequency'], data = tuples)
         
         self.encoder = LabelEncoder().fit(df['Language'])
-        
+
         y = self.encoder.transform(df['Language'])
         X = self._generate_features(df['Word'])
+        freqs = df['Frequency']
         self.cols = X.columns
 
         print("Training data generated...")
@@ -42,18 +43,12 @@ class RandomForestLanguageClassifier:
             if self.n_pca != -1:
                 self.pca = PCA(n_components=self.n_pca)
                 X = self.pca.fit_transform(X)
+                print("Dimensionality reduced...")
 
-            print("Dimensionality reduced...")
-
-            self.classifiers = []
-            for language in self.encoder.classes_:
-                print(f"Training classifier for {language}...")
-                y_lang = y == self.encoder.transform([language])[0]
-
-                clf = RandomForestClassifier(verbose=0, n_estimators=self.n_trees,
-                    max_depth=self.max_depth, n_jobs=-1)
-                clf.fit(X, y_lang)
-                self.classifiers.append(clf)
+            self.clf = RandomForestClassifier(verbose=2, n_estimators=self.n_trees,
+                max_depth=self.max_depth, n_jobs=-1)
+            self.clf.fit(X, y, sample_weight=freqs)
+            self.clf.verbose = 0
 
     def _generate_features_for_word(self, word):
         """
@@ -100,36 +95,47 @@ class RandomForestLanguageClassifier:
         features = self._generate_features(words)
         X = pd.DataFrame(columns = self.cols)
 
-        merged = X.merge(features, how='right')[self.cols].fillna(0)
-        
+        try:
+            merged = X.merge(features, how='right')[self.cols].fillna(0)
+        except:
+            return "Unknown", [0] * len(LANGUAGE_CODE)
+
+
         with warnings.catch_warnings():
             warnings.simplefilter(action='ignore', category=FutureWarning)
             if self.n_pca != -1:
                 merged = self.pca.transform(merged)
-            preds = []
-            for clf in self.classifiers:
-                preds.append(clf.predict_log_proba(merged))
+            preds = self.clf.predict_proba(merged)
 
-        soft_prediction = np.array(preds).sum(axis=1)[:, 1]
-        soft_prediction /= np.exp(soft_prediction - np.max(soft_prediction))
+        soft_prediction = np.array(preds).sum(axis=0)
+
+        # below removes since not doing log probs
+        # soft_prediction = np.exp(soft_prediction - np.max(soft_prediction))
         soft_prediction = np.exp(soft_prediction) / np.sum(np.exp(soft_prediction)) # softmax
 
-        print([(lang, pred) for lang, pred in zip(self.encoder.classes_, soft_prediction)])
-
         hard_prediction = self.encoder.classes_[np.argmax(soft_prediction)]
-        hard_prediction = LANGUAGE_CODE[hard_prediction]
 
         return hard_prediction, soft_prediction
 
 if __name__ == "__main__":
     from IO import store_model
+    from sklearn import tree
 
-    test = RandomForestLanguageClassifier(n_trees=100, max_depth=5, n_pca=100, max_ngrams=2)
-    test.train()
-    while True:
-        word = input("Enter a sentence or 'quit': ")
-        if word == 'quit':
-            break
-        prediction, probs = test.predict(word)
-        print(f"Predicted language: {prediction}")
-    store_model(test, "random_forest_model.pkl")
+    n_trees = 1000
+    max_depth = 3
+    n_pca = -1
+    max_ngrams = 2
+
+    model_name = f"{n_trees}t_{max_depth}d_{n_pca}p_{max_ngrams}n"
+
+    model = RandomForestLanguageClassifier(1000, n_trees, max_depth, max_ngrams, n_pca)
+    model.train()
+    try:
+        while True:
+            word = input("Enter a sentence or 'quit': ")
+            if word == 'quit':
+                break
+            prediction, probs = model.predict(word)
+            print(f"Predicted language: {prediction}")
+    finally:
+        store_model(model, model_name)
